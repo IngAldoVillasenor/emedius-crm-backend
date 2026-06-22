@@ -17,7 +17,7 @@ public class DataSeeder {
             if (userRepository.findByEmail("admin@emediusgw.com").isEmpty()) {
 
                 User admin = new User();
-                //admin.setName("Emedius Admin");
+                admin.setName("Emedius Admin");
                 admin.setEmail("admin@emediusgw.com");
 
                 // Si usas Spring Security, el password DEBE ir encriptado:
