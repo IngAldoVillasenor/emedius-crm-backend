@@ -1,11 +1,22 @@
 spring:
   application:
     name: crm-backend
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: tu.correo@gmail.com
+    password: tu_contraseña_de_aplicacion_aqui
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/crm_db
-    username: postgres
-    password: admin
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/crm_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:admin}
     driver-class-name: org.postgresql.Driver
 
   flyway:

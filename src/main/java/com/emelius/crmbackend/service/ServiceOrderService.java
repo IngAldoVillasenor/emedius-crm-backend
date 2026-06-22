@@ -20,13 +20,16 @@ public class ServiceOrderService {
     private final ServiceOrderRepository serviceOrderRepository;
     private final InstrumentRepository instrumentRepository;
     private final WhatsAppService whatsAppService;
+    private final EmailService emailService;
 
     public ServiceOrderService(ServiceOrderRepository serviceOrderRepository,
                                InstrumentRepository instrumentRepository,
-                               WhatsAppService whatsAppService) {
+                               WhatsAppService whatsAppService,
+                               EmailService emailService) {
         this.serviceOrderRepository = serviceOrderRepository;
         this.instrumentRepository = instrumentRepository;
         this.whatsAppService = whatsAppService;
+        this.emailService = emailService;
     }
 
     // La magia de @Transactional: si algo falla en la BD, revierte todo automáticamente
@@ -79,9 +82,11 @@ public class ServiceOrderService {
 
         // Si el nuevo estatus es "LISTO", disparamos el WhatsApp
         if ("LISTO".equalsIgnoreCase(newStatus)) {
-            whatsAppService.sendReadyNotification(
-                    updatedOrder.getInstrument().getCustomer(),
-                    updatedOrder.getInstrument()
+            emailService.sendReadyNotification(
+                    order.getInstrument().getCustomer().getEmail(),
+                    order.getInstrument().getCustomer().getName(),
+                    order.getInstrument().getBrand() + " " + order.getInstrument().getModel(),
+                    order.getId().toString().split("-")[0].toUpperCase()
             );
         }
 
