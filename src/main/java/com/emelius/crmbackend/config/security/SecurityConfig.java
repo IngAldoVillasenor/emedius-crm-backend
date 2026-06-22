@@ -35,7 +35,7 @@ public class SecurityConfig {
                         // 2. FUNDAMENTAL: Dejar pasar las peticiones preflight (OPTIONS) de los navegadores
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // 3. Permitimos el login
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/**", "/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
