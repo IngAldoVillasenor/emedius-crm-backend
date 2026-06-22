@@ -51,7 +51,9 @@ public class SecurityConfig {
         // Agregamos AMBOS orígenes: Tu producción y tu entorno local
         configuration.setAllowedOrigins(List.of(
                 "https://emedius-crm-frontend.vercel.app",
-                "http://localhost:3000"
+                "http://localhost:3000",
+                "https://emediusgw.com",
+                "https://www.emediusgw.com"
         ));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
