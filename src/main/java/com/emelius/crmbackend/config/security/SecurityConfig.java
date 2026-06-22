@@ -2,10 +2,10 @@ package com.emelius.crmbackend.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,42 +28,40 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(request -> {
-                    var corsConfiguration = new org.springframework.web.cors.CorsConfiguration();
-                    corsConfiguration.setAllowedOrigins(java.util.List.of("https://emedius-crm-frontend.vercel.app"));
-                    corsConfiguration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    corsConfiguration.setAllowedHeaders(java.util.List.of("*"));
-                    corsConfiguration.setAllowCredentials(true);
-                    return corsConfiguration;
-                }))
-                .csrf(AbstractHttpConfigurer::disable) // Deshabilitamos CSRF para el MVP
+                // 1. Le decimos que use explícitamente nuestro Bean de CORS de abajo
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll() // Permitimos el login
+                        // 2. FUNDAMENTAL: Dejar pasar las peticiones preflight (OPTIONS) de los navegadores
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // 3. Permitimos el login
+                        .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
         return http.build();
     }
 
-    // 2. Definimos las reglas exactas de quién puede entrar
+    // 4. Única fuente de verdad para CORS
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // El puerto exacto de tu Next.js
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        // Agregamos AMBOS orígenes: Tu producción y tu entorno local
+        configuration.setAllowedOrigins(List.of(
+                "https://emedius-crm-frontend.vercel.app",
+                "http://localhost:3000"
+        ));
 
-        // Los métodos HTTP que Next.js tiene permitido usar
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // Los Headers que le permitimos enviar (¡Vital incluir tu Tenant ID y Authorization!)
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Tenant-ID"));
+        // Permitimos todos los headers por ahora para evitar bloqueos en el MVP
+        configuration.setAllowedHeaders(Arrays.asList("*"));
 
-        // Exponer headers si el frontend necesita leerlos en la respuesta
         configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Aplicamos esta regla de CORS a todos los endpoints de nuestra API
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
