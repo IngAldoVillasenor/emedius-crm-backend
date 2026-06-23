@@ -2,7 +2,9 @@ package com.emelius.crmbackend.controller;
 
 import com.emelius.crmbackend.dto.request.OrderStatusRequestDTO;
 import com.emelius.crmbackend.dto.request.ServiceOrderRequestDTO;
+import com.emelius.crmbackend.dto.request.UnifiedOrderRequestDTO;
 import com.emelius.crmbackend.dto.response.ServiceOrderResponseDTO;
+import com.emelius.crmbackend.entity.tenant.ServiceOrder;
 import com.emelius.crmbackend.service.ServiceOrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -56,5 +58,11 @@ public class ServiceOrderController {
             @RequestBody ServiceOrderRequestDTO request) {
         ServiceOrderResponseDTO response = serviceOrderService.updateServiceOrder(id, request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/unified")
+    public ResponseEntity<?> createUnifiedOrder(@RequestBody @Valid UnifiedOrderRequestDTO request) {
+        ServiceOrder newOrder = serviceOrderService.createUnifiedWorkflow(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newOrder);
     }
 }

@@ -2,11 +2,15 @@ package com.emelius.crmbackend.service;
 
 import com.emelius.crmbackend.dto.request.IntakeConditionDTO;
 import com.emelius.crmbackend.dto.request.ServiceOrderRequestDTO;
+import com.emelius.crmbackend.dto.request.UnifiedOrderRequestDTO;
 import com.emelius.crmbackend.dto.response.ServiceOrderResponseDTO;
+import com.emelius.crmbackend.entity.tenant.Customer;
 import com.emelius.crmbackend.entity.tenant.Instrument;
 import com.emelius.crmbackend.entity.tenant.IntakeCondition;
 import com.emelius.crmbackend.entity.tenant.ServiceOrder;
+import com.emelius.crmbackend.repository.tenant.CustomerRepository;
 import com.emelius.crmbackend.repository.tenant.InstrumentRepository;
+import com.emelius.crmbackend.repository.tenant.IntakeConditionRepository;
 import com.emelius.crmbackend.repository.tenant.ServiceOrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,16 +23,22 @@ public class ServiceOrderService {
 
     private final ServiceOrderRepository serviceOrderRepository;
     private final InstrumentRepository instrumentRepository;
+    private final CustomerRepository customerRepository;
+    private final IntakeConditionRepository intakeConditionRepository;
     private final WhatsAppService whatsAppService;
     private final EmailService emailService;
 
     public ServiceOrderService(ServiceOrderRepository serviceOrderRepository,
                                InstrumentRepository instrumentRepository,
                                WhatsAppService whatsAppService,
+                               CustomerRepository customerRepository,
+                               IntakeConditionRepository intakeConditionRepository,
                                EmailService emailService) {
         this.serviceOrderRepository = serviceOrderRepository;
         this.instrumentRepository = instrumentRepository;
         this.whatsAppService = whatsAppService;
+        this.customerRepository = customerRepository;
+        this.intakeConditionRepository = intakeConditionRepository;
         this.emailService = emailService;
     }
 
@@ -141,6 +151,61 @@ public class ServiceOrderService {
 
         ServiceOrder savedOrder = serviceOrderRepository.save(order);
         return mapToResponse(savedOrder);
+    }
+
+    @Transactional
+    public ServiceOrder createUnifiedWorkflow(UnifiedOrderRequestDTO request) {
+
+        // 1. RESOLVER EL CLIENTE
+        Customer customer;
+        if (request.getExistingCustomerId() != null && !request.getExistingCustomerId().trim().isEmpty()) {
+            customer = customerRepository.findById(UUID.fromString(request.getExistingCustomerId()))
+                    .orElseThrow(() -> new RuntimeException("Cliente existente no encontrado"));
+        } else {
+            customer = new Customer();
+            customer.setName(request.getNewCustomerName());
+            customer.setWhatsappNumber(request.getNewCustomerPhone());
+            customer.setEmail(request.getNewCustomerEmail());
+            customer = customerRepository.save(customer);
+        }
+
+        // 2. RESOLVER EL INSTRUMENTO
+        Instrument instrument;
+        if (request.getExistingInstrumentId() != null && !request.getExistingInstrumentId().trim().isEmpty()) {
+            instrument = instrumentRepository.findById(UUID.fromString(request.getExistingInstrumentId()))
+                    .orElseThrow(() -> new RuntimeException("Instrumento existente no encontrado"));
+        } else {
+            instrument = new Instrument();
+            instrument.setBrand(request.getNewInstrumentBrand());
+            instrument.setModel(request.getNewInstrumentModel());
+            instrument.setType(request.getNewInstrumentType());
+            instrument.setCustomer(customer);
+            instrument = instrumentRepository.save(instrument);
+        }
+
+        // 3. CREAR LA ORDEN DE SERVICIO
+        ServiceOrder order = new ServiceOrder();
+        //order.setCustomer(customer);
+        order.setInstrument(instrument);
+        order.setServiceType(request.getServiceType());
+        order.setStatus("RECIBIDO");
+        // Asegúrate de tener el campo notes en tu ServiceOrder, si no, puedes omitirlo
+        order.setSpecificRequests(request.getInitialNotes());
+        order = serviceOrderRepository.save(order);
+
+        // 4. CREAR LAS CONDICIONES DE ENTRADA (Intake Conditions)
+        IntakeCondition condition = new IntakeCondition();
+        condition.setServiceOrder(order); // Relación @OneToOne
+        condition.setStringGauge(request.getStringGauge());
+        condition.setAction1stFret(request.getAction1stFret());
+        condition.setAction12thFret(request.getAction12thFret());
+        condition.setPaintCondition(request.getPaintCondition());
+        condition.setFretboardStatus(request.getFretboardStatus());
+        condition.setHardwareStatus(request.getHardwareStatus());
+
+        intakeConditionRepository.save(condition);
+
+        return order;
     }
 
     // El método maestro de aplanamiento
