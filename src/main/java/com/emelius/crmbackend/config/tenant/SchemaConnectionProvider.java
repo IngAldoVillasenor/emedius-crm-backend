@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 @Component
 public class SchemaConnectionProvider implements MultiTenantConnectionProvider<String> {
@@ -16,29 +17,35 @@ public class SchemaConnectionProvider implements MultiTenantConnectionProvider<S
         this.dataSource = dataSource;
     }
 
+    private void executeSetSchema(Connection connection, String schema) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("SET search_path TO " + schema);
+        }
+    }
+
     @Override
     public Connection getAnyConnection() throws SQLException {
         Connection connection = dataSource.getConnection();
-        connection.setSchema(TenantIdentifierResolver.DEFAULT_TENANT_SCHEMA);
+        executeSetSchema(connection, TenantIdentifierResolver.DEFAULT_TENANT_SCHEMA);
         return connection;
     }
 
     @Override
     public void releaseAnyConnection(Connection connection) throws SQLException {
-        connection.setSchema("public");
+        executeSetSchema(connection, "public");
         connection.close();
     }
 
     @Override
     public Connection getConnection(String tenantIdentifier) throws SQLException {
         Connection connection = dataSource.getConnection();
-        connection.setSchema(tenantIdentifier);
+        executeSetSchema(connection, tenantIdentifier);
         return connection;
     }
 
     @Override
     public void releaseConnection(String tenantIdentifier, Connection connection) throws SQLException {
-        connection.setSchema("public");
+        executeSetSchema(connection, "public");
         connection.close();
     }
 
