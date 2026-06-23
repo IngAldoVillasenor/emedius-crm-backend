@@ -41,6 +41,8 @@ public class FlywayConfig {
                 .locations("db/migration/public")
                 .baselineOnMigrate(true)
                 .load();
+        //flywayPublic.repair();
+
         flywayPublic.migrate();
 
         List<String> tenants = new ArrayList<>();
@@ -62,6 +64,8 @@ public class FlywayConfig {
                     .locations("db/migration/tenant")
                     .baselineOnMigrate(true)
                     .load();
+            //flywayTenant.repair();
+
             flywayTenant.migrate();
         }
 
