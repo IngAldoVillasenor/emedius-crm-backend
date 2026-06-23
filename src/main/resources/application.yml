@@ -2,14 +2,16 @@ spring:
   application:
     name: crm-backend
   mail:
-    host: smtp.gmail.com
-    port: 587
+    host: smtppro.zoho.com
+    port: 465
     username: taller@emediusgw.com
-    password: FWHRcb10CtWD
+    password: CvG2Txk4ruRz
     properties:
       mail:
         smtp:
           auth: true
+          ssl:
+            enable: true
           starttls:
             enable: true
 
