@@ -18,12 +18,15 @@ public class EmailService {
     public void sendReadyNotification(String toEmail, String customerName, String instrumentName, String folio) {
         SimpleMailMessage message = new SimpleMailMessage();
 
+        String calendlyLink = "https://calendly.com/emediusgw/entrega";
+
         message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject("¡Tu instrumento está listo! 🎸 - Emedius' Workshop");
 
         String body = "Hola " + customerName + ",\n\n"
-                + "Te informamos que el servicio para tu " + instrumentName + " (Folio: #" + folio + ") ha concluido exitosamente y ya está listo para ser entregado.\n\n"
+                + "Te informamos que el servicio para tu " + instrumentName + " (Folio: #" + folio + ") ha concluido exitosamente y ya está listo para ser entregado.\n"
+                + "Por favor, agenda el día y hora para recogerla en el siguiente enlace: " + calendlyLink + "\n\n"
                 + "Puedes pasar al taller a recogerlo dentro de nuestros horarios de atención. Recuerda llevar tu ticket de recepción.\n\n"
                 + "¡Gracias por confiar en nosotros!\n"
                 + "Atte: Emedius' Guitar Workshop";
