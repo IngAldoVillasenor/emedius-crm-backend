@@ -29,5 +29,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        tenant_identifier_resolver: com.emelius.crmbackend.config.tenant.TenantIdentifierResolver
+        multi_tenant_connection_provider: com.emelius.crmbackend.config.tenant.SchemaConnectionProvider
     show-sql: true
     open-in-view: false

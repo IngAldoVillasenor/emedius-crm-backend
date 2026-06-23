@@ -18,6 +18,7 @@ public class SchemaConnectionProvider implements MultiTenantConnectionProvider<S
     }
 
     private void executeSetSchema(Connection connection, String schema) throws SQLException {
+        System.out.println("🚀 [MULTI-TENANT] Forzando PostgreSQL a buscar en el esquema: " + schema);
         try (Statement statement = connection.createStatement()) {
             statement.execute("SET search_path TO " + schema);
         }
