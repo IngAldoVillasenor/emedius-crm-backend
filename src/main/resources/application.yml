@@ -3,7 +3,7 @@ spring:
     name: crm-backend
   mail:
     host: smtppro.zoho.com
-    port: 465
+    port: 587
     username: taller@emediusgw.com
     password: CvG2Txk4ruRz
     properties:
