@@ -23,6 +23,12 @@ public class ServiceOrderRequestDTO {
     @JsonProperty("notes")
     private String specificRequests;
 
+    private String status;
+
+    private Double extraCost;
+
+    private String extraWorkReason;
+
     @NotNull(message = "Las condiciones de recepción son obligatorias")
     private IntakeConditionDTO intakeCondition;
 }

@@ -64,4 +64,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
+    // Añade este método dentro de tu JwtAuthenticationFilter
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        // El filtro ignorará por completo el login y nuestras rutas públicas
+        return path.startsWith("/api/auth/") || path.startsWith("/api/public/");
+    }
 }

@@ -47,6 +47,22 @@ public class ServiceOrder {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // El token secreto y único que se le enviará al cliente (Ej. "a1b2c3d4...")
+    @Column(name = "approval_token", unique = true)
+    private String approvalToken;
+
+    // Cuánto dinero extra se requiere
+    @Column(name = "extra_cost")
+    private Double extraCost;
+
+    // Por qué se requiere ese dinero extra (Ej. "Potenciómetro quemado")
+    @Column(columnDefinition = "TEXT", name = "extra_work_reason")
+    private String extraWorkReason;
+
+    // El "Sello Legal". Guarda el segundo exacto en que el cliente aceptó los términos
+    @Column(name = "terms_accepted_at")
+    private LocalDateTime termsAcceptedAt;
+
     // Relación 1 a 1: Una orden tiene un solo registro de condiciones de entrada
     @OneToOne(mappedBy = "serviceOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private IntakeCondition intakeCondition;

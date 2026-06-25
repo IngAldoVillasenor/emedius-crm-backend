@@ -12,6 +12,7 @@ import java.util.UUID;
 @Setter
 public class ServiceOrderResponseDTO {
     private UUID id;
+    private UUID instrumentId;
     private String serviceType;
     private String status;
     private String notes;
@@ -20,6 +21,12 @@ public class ServiceOrderResponseDTO {
     private String instrumentBrand;
     private String instrumentModel;
     private String customerName;
+
+    private String extraWorkReason;
+    private Double extraCost;
+
+    private String approvalToken;
+    private LocalDateTime termsAcceptedAt;
 
     // Para que la fecha se muestre bien y no diga "Sin fecha"
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")

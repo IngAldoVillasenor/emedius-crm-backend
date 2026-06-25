@@ -42,4 +42,7 @@ public class Instrument {
 
     @OneToMany(mappedBy = "instrument", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceOrder> serviceOrders = new ArrayList<>();
+
+    @OneToMany(mappedBy = "instrument", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InstrumentLog> logs = new ArrayList<>();
 }

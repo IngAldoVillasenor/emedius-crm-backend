@@ -130,6 +130,22 @@ public class ServiceOrderService {
         if (dto.getServiceType() != null) order.setServiceType(dto.getServiceType());
         if (dto.getSpecificRequests() != null) order.setSpecificRequests(dto.getSpecificRequests());
 
+        // NUEVA LÓGICA PARA APROBACIÓN
+        if (dto.getStatus() != null) {
+            order.setStatus(dto.getStatus());
+
+            if ("REQUIERE_APROBACION".equals(dto.getStatus())) {
+                order.setExtraCost(dto.getExtraCost());
+                order.setExtraWorkReason(dto.getExtraWorkReason());
+                order.setTermsAcceptedAt(null);
+
+                // Generamos el link secreto solo si no tenía uno ya
+                if (order.getApprovalToken() == null || order.getApprovalToken().isEmpty()) {
+                    order.setApprovalToken(UUID.randomUUID().toString());
+                }
+            }
+        }
+
         // 2. Actualizamos la Hoja de Inspección (IntakeCondition)
         if (dto.getIntakeCondition() != null) {
             // Verificamos si ya tenía una hoja, si no, la creamos
@@ -221,12 +237,20 @@ public class ServiceOrderService {
 
         // 2. Extracción de las relaciones (Aplanamiento)
         if (order.getInstrument() != null) {
+            response.setInstrumentId(order.getInstrument().getId());
             response.setInstrumentBrand(order.getInstrument().getBrand());
             response.setInstrumentModel(order.getInstrument().getModel());
 
             if (order.getInstrument().getCustomer() != null) {
                 response.setCustomerName(order.getInstrument().getCustomer().getName());
             }
+        }
+
+        if(order.getApprovalToken() != null) {
+            response.setApprovalToken(order.getApprovalToken());
+            response.setTermsAcceptedAt(order.getTermsAcceptedAt());
+            response.setExtraCost(order.getExtraCost());
+            response.setExtraWorkReason(order.getExtraWorkReason());
         }
 
         // 3. NUEVO: Mapeo de las Condiciones de Entrada
